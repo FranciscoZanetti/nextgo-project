@@ -1,0 +1,25 @@
+# General
+.DS_Store
+*.log
+
+# Next / Frontend
+node_modules/
+.next/
+out/
+build/
+coverage/
+.env*
+
+# Go / Backend
+*.exe
+*.out
+*.test
+backend/main
+
+# Docker
+pgdata/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
