@@ -3,31 +3,55 @@ package handlers
 import (
     "encoding/json"
     "net/http"
+    "strconv"
     "strings"
 
+    "github.com/FranciscoZanetti/nextgo-project/backend/internal/database"
     "github.com/FranciscoZanetti/nextgo-project/backend/internal/models"
 )
 
 func HandleTasks(w http.ResponseWriter, r *http.Request) {
     switch r.Method {
     case http.MethodGet:
-        tasks := []models.Task{
-            {ID: "1", Title: "Learn Go", Completed: false, CreatedAt: "2024-01-01T00:00:00Z"},
-            {ID: "2", Title: "Build API", Completed: true, CreatedAt: "2024-01-02T00:00:00Z"},
+        rows, err := database.DB.Query("SELECT id, title, description, created_at FROM task")
+        if err != nil {
+            http.Error(w, err.Error(), http.StatusInternalServerError)
+            return
         }
+        defer rows.Close()
+
+        var tasks []models.Task
+        for rows.Next() {
+            var t models.Task
+            if err := rows.Scan(&t.ID, &t.Title, &t.Description, &t.CreatedAt); err != nil {
+                http.Error(w, err.Error(), http.StatusInternalServerError)
+                return
+            }
+            tasks = append(tasks, t)
+        }
+
         w.Header().Set("Content-Type", "application/json")
         json.NewEncoder(w).Encode(tasks)
 
     case http.MethodPost:
-        var newTask models.Task
-        if err := json.NewDecoder(r.Body).Decode(&newTask); err != nil {
+        var t models.Task
+        if err := json.NewDecoder(r.Body).Decode(&t); err != nil {
             http.Error(w, err.Error(), http.StatusBadRequest)
             return
         }
-        newTask.ID = "123" // ID simulado
-        newTask.CreatedAt = "2024-01-10T00:00:00Z"
+
+        err := database.DB.QueryRow(
+            "INSERT INTO task (title, description) VALUES ($1, $2) RETURNING id, created_at",
+            t.Title, t.Description,
+        ).Scan(&t.ID, &t.CreatedAt)
+
+        if err != nil {
+            http.Error(w, err.Error(), http.StatusInternalServerError)
+            return
+        }
+
         w.Header().Set("Content-Type", "application/json")
-        json.NewEncoder(w).Encode(newTask)
+        json.NewEncoder(w).Encode(t)
 
     default:
         http.Error(w, "Método no soportado", http.StatusMethodNotAllowed)
@@ -35,26 +59,45 @@ func HandleTasks(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleTaskByID(w http.ResponseWriter, r *http.Request) {
-    id := strings.TrimPrefix(r.URL.Path, "/tasks/")
+    idStr := strings.TrimPrefix(r.URL.Path, "/tasks/")
+    id, err := strconv.Atoi(idStr)
+    if err != nil {
+        http.Error(w, "ID inválido", http.StatusBadRequest)
+        return
+    }
 
     switch r.Method {
     case http.MethodGet:
-        task := models.Task{ID: id, Title: "Mock Task", Completed: false, CreatedAt: "2024-01-05T00:00:00Z"}
-        w.Header().Set("Content-Type", "application/json")
-        json.NewEncoder(w).Encode(task)
+        var t models.Task
+        err := database.DB.QueryRow("SELECT id, title, description, created_at FROM task WHERE id = $1", id).
+            Scan(&t.ID, &t.Title, &t.Description, &t.CreatedAt)
+
+        if err != nil {
+            http.Error(w, "No encontrado", http.StatusNotFound)
+            return
+        }
+        json.NewEncoder(w).Encode(t)
 
     case http.MethodPut:
-        var updatedTask models.Task
-        if err := json.NewDecoder(r.Body).Decode(&updatedTask); err != nil {
+        var t models.Task
+        if err := json.NewDecoder(r.Body).Decode(&t); err != nil {
             http.Error(w, err.Error(), http.StatusBadRequest)
             return
         }
-        updatedTask.ID = id
-        updatedTask.CreatedAt = "2024-01-05T00:00:00Z"
-        w.Header().Set("Content-Type", "application/json")
-        json.NewEncoder(w).Encode(updatedTask)
+
+        _, err := database.DB.Exec("UPDATE task SET title=$1, description=$2 WHERE id=$3", t.Title, t.Description, id)
+        if err != nil {
+            http.Error(w, err.Error(), http.StatusInternalServerError)
+            return
+        }
+        w.WriteHeader(http.StatusNoContent)
 
     case http.MethodDelete:
+        _, err := database.DB.Exec("DELETE FROM task WHERE id=$1", id)
+        if err != nil {
+            http.Error(w, err.Error(), http.StatusInternalServerError)
+            return
+        }
         w.WriteHeader(http.StatusNoContent)
 
     default:
