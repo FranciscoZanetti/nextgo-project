@@ -1,0 +1,18 @@
+version: "3.8"
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: nextgoproject_backend
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    environment:
+      - DB_HOST=disabled
+      - DB_PORT=5432
+      - DB_USER=disabled
+      - DB_PASSWORD=disabled
+      - DB_NAME=disabled
