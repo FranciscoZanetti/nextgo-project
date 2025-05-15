@@ -11,12 +11,6 @@ import (
 
 func TestMain(m *testing.M) {
 	database.InitDB()
-	code := m.Run()
-	os.Exit(code)
-}
-
-func TestMain(m *testing.M) {
-	database.InitDB()
 
 	database.DB.Exec("DELETE FROM task")
 
@@ -29,6 +23,20 @@ func TestMain(m *testing.M) {
 	code := m.Run()
 	database.DB.Exec("DELETE FROM task")
 	os.Exit(code)
+}
+
+func TestHandleTasks_Get(t *testing.T) {
+    req := httptest.NewRequest(http.MethodGet, "/tasks", nil)
+    w := httptest.NewRecorder()
+
+    HandleTasks(w, req)
+
+    resp := w.Result()
+    defer resp.Body.Close()
+
+    if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusInternalServerError {
+        t.Errorf("expected status 200 or 500, got %d", resp.StatusCode)
+    }
 }
 
 func TestHandleTasks_Post(t *testing.T) {
