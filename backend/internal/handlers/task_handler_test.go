@@ -7,6 +7,12 @@ import (
     "testing"
 )
 
+func TestMain(m *testing.M) {
+	database.InitDB()
+	code := m.Run()
+	os.Exit(code)
+}
+
 func TestHandleTasks_Get(t *testing.T) {
     req := httptest.NewRequest(http.MethodGet, "/tasks", nil)
     w := httptest.NewRecorder()
