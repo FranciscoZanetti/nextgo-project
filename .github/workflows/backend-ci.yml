@@ -71,3 +71,4 @@ jobs:
           DB_PORT: 5432
           DB_HOST: localhost
           PORT: ${{ vars.PORT }}
+
