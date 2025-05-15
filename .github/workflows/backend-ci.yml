@@ -11,28 +11,29 @@ jobs:
     runs-on: ubuntu-latest
     environment: development
 
+    # Variables disponibles para el job completo
+    env:
+      DB_USER: ${{ secrets.DB_USER }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      DB_NAME: ${{ secrets.DB_NAME }}
+      DB_PORT: 5432
+      DB_HOST: localhost
+      PORT: ${{ vars.PORT }}
+
     services:
       postgres:
         image: postgres:15
         ports:
           - 5432:5432
         env:
-          POSTGRES_USER: ${{ secrets.DB_USER }}
-          POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          POSTGRES_DB: ${{ secrets.DB_NAME }}
+          POSTGRES_USER: $DB_USER
+          POSTGRES_PASSWORD: $DB_PASSWORD
+          POSTGRES_DB: $DB_NAME
         options: >-
-          --health-cmd="pg_isready -U ${{ secrets.DB_USER }}"
+          --health-cmd="pg_isready -U $DB_USER"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
-
-    env:
-      DB_HOST: ${{ secrets.DB_HOST }}
-      DB_PORT: ${{ secrets.DB_PORT }}
-      DB_USER: ${{ secrets.DB_USER }}
-      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-      DB_NAME: ${{ secrets.DB_NAME }}
-      PORT: ${{ vars.PORT }}
 
     defaults:
       run:
@@ -50,10 +51,10 @@ jobs:
       - name: Verify Go version
         run: go version
 
-      - name: Wait for DB
+      - name: Wait for PostgreSQL
         run: |
           for i in {1..10}; do
-            pg_isready -h ${{ secrets.DB_HOST }} -p ${{ secrets.DB_PORT }} -U ${{ secrets.DB_USER }} && break
+            pg_isready -h localhost -p $DB_PORT -U $DB_USER && break
             echo "Waiting for PostgreSQL..."
             sleep 3
           done
