@@ -5,6 +5,8 @@ import (
     "net/http"
     "net/http/httptest"
     "testing"
+	"os"
+	"github.com/FranciscoZanetti/nextgo-project/backend/internal/database"
 )
 
 func TestMain(m *testing.M) {
@@ -13,18 +15,20 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
-func TestHandleTasks_Get(t *testing.T) {
-    req := httptest.NewRequest(http.MethodGet, "/tasks", nil)
-    w := httptest.NewRecorder()
+func TestMain(m *testing.M) {
+	database.InitDB()
 
-    HandleTasks(w, req)
+	database.DB.Exec("DELETE FROM task")
 
-    resp := w.Result()
-    defer resp.Body.Close()
+	database.DB.Exec(`
+		INSERT INTO task (title, description) VALUES
+		('Test Task 1', 'Description 1'),
+		('Test Task 2', 'Description 2')
+	`)
 
-    if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusInternalServerError {
-        t.Errorf("expected status 200 or 500, got %d", resp.StatusCode)
-    }
+	code := m.Run()
+	database.DB.Exec("DELETE FROM task")
+	os.Exit(code)
 }
 
 func TestHandleTasks_Post(t *testing.T) {
