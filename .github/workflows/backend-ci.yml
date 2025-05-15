@@ -11,14 +11,6 @@ jobs:
     runs-on: ubuntu-latest
     environment: development
 
-    env:
-      DB_USER: ${{ secrets.DB_USER }}
-      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-      DB_NAME: ${{ secrets.DB_NAME }}
-      DB_PORT: 5432
-      DB_HOST: localhost
-      PORT: ${{ vars.PORT }}
-
     services:
       postgres:
         image: postgres:15
@@ -53,13 +45,29 @@ jobs:
       - name: Wait for PostgreSQL
         run: |
           for i in {1..10}; do
-            pg_isready -h localhost -p 5432 -U ${{ secrets.DB_USER }} && break
+            pg_isready -h localhost -p 5432 -U $DB_USER && break
             echo "Waiting for PostgreSQL..."
             sleep 3
           done
+        env:
+          DB_USER: ${{ secrets.DB_USER }}
 
       - name: Install dependencies
         run: go mod tidy
+        env:
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_PORT: 5432
+          DB_HOST: localhost
+          PORT: ${{ vars.PORT }}
 
       - name: Run tests
         run: go test ./...
+        env:
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_PORT: 5432
+          DB_HOST: localhost
+          PORT: ${{ vars.PORT }}
