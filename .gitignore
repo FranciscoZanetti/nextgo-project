@@ -9,6 +9,8 @@ out/
 build/
 coverage/
 .env*
+/frontend/.env*
+/backend/.env*
 
 # Go / Backend
 *.exe
