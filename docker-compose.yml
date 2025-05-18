@@ -18,6 +18,20 @@ services:
       - PORT=${PORT}
     depends_on:
       - db
+  
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: nextgoproject_frontend
+    ports:
+      - "${FRONT_PORT}:${FRONT_PORT}"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://nextgoproject_backend:${PORT}
+    depends_on:
+      - backend
+    env_file:
+      - ./frontend/.env
 
   db:
     image: postgres:15

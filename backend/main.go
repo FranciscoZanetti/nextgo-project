@@ -19,9 +19,10 @@ func main() {
         w.Write([]byte(`{"status":"ok"}`))
     })
 
-    http.HandleFunc("/tasks", handlers.HandleTasks)
-    http.HandleFunc("/tasks/", handlers.HandleTaskByID)
+    mux := http.NewServeMux()
+    mux.Handle("/tasks", handlers.EnableCORS(http.HandlerFunc(handlers.HandleTasks)))
+    mux.Handle("/tasks/", handlers.EnableCORS(http.HandlerFunc(handlers.HandleTaskByID)))
 
-    log.Printf("Servidor escuchando en %s:%s", url, port)
-    log.Fatal(http.ListenAndServe(":" + port, nil))
+    log.Printf("Server running on %s:%s", url, port)
+    log.Fatal(http.ListenAndServe(":" + port, mux))
 }
