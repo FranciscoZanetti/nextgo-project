@@ -15,11 +15,12 @@ func main() {
 	port := os.Getenv("PORT")
 	url := os.Getenv("URL")
 
-    http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+    mux := http.NewServeMux()
+
+    mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
         w.Write([]byte(`{"status":"ok"}`))
     })
 
-    mux := http.NewServeMux()
     mux.Handle("/tasks", handlers.EnableCORS(http.HandlerFunc(handlers.HandleTasks)))
     mux.Handle("/tasks/", handlers.EnableCORS(http.HandlerFunc(handlers.HandleTaskByID)))
 
