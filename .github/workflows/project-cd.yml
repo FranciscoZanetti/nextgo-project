@@ -2,7 +2,7 @@ name: Deploy to Render
 
 on:
   workflow_run:
-    workflows: ["Full Project CI"]  # Nombre EXACTO del CI
+    workflows: ["Full Project CI"]
     types:
       - completed
 
