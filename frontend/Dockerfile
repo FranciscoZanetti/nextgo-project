@@ -6,7 +6,6 @@ COPY package*.json ./
 RUN npm install
 
 COPY postcss.config.js tailwind.config.js ./
-COPY .env .env
 COPY . .
 RUN npm run build
 
