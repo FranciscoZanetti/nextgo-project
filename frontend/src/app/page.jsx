@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 
 async function loadTasks() {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_INTERNAL_API_URL;
+    const baseUrl = process.env.INTERNAL_API_URL;
     const res = await fetch(`${baseUrl}/tasks`, {
       next: { revalidate: 10 },
     });
