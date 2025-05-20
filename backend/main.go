@@ -27,9 +27,9 @@ func main() {
 	port := os.Getenv("PORT")
 	url := os.Getenv("URL")
 
-    sentryHandler := sentryhttp.New(sentryhttp.Options{
-		Repanic: true,
-	})
+    // sentryHandler := sentryhttp.New(sentryhttp.Options{
+	// 	Repanic: true,
+	// })
 
     mux := http.NewServeMux()
 
