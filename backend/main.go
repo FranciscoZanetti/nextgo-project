@@ -4,6 +4,7 @@ import (
     "log"
     "net/http"
 	"os"
+    "time"
 
     "github.com/getsentry/sentry-go"
 	sentryhttp "github.com/getsentry/sentry-go/http"
