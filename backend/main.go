@@ -27,18 +27,18 @@ func main() {
 	port := os.Getenv("PORT")
 	url := os.Getenv("URL")
 
-    // sentryHandler := sentryhttp.New(sentryhttp.Options{
-	// 	Repanic: true,
-	// })
-
     mux := http.NewServeMux()
 
     mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
         w.Write([]byte(`{"status":"ok"}`))
     })
 
-    mux.Handle("/tasks", handlers.EnableCORS(http.HandlerFunc(handlers.HandleTasks)))
-    mux.Handle("/tasks/", handlers.EnableCORS(http.HandlerFunc(handlers.HandleTaskByID)))
+    sentryHandler := sentryhttp.New(sentryhttp.Options{
+        Repanic: true,
+    })
+    
+    mux.Handle("/tasks", sentryHandler.Handle(handlers.EnableCORS(http.HandlerFunc(handlers.HandleTasks))))
+    mux.Handle("/tasks/", sentryHandler.Handle(handlers.EnableCORS(http.HandlerFunc(handlers.HandleTaskByID))))    
 
     log.Printf("Server running on %s:%s", url, port)
     log.Fatal(http.ListenAndServe(":" + port, mux))
