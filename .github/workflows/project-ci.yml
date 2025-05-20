@@ -98,7 +98,7 @@ jobs:
 
       - name: Build and push frontend
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/nextgo-frontend:${{ github.sha }} ./frontend
+          docker build --build-arg NEXT_PUBLIC_API_URL=https://nextgo-backend-latest.onrender.com --build-arg INTERNAL_API_URL=https://nextgo-backend-latest.onrender.com -t ${{ secrets.DOCKER_USERNAME }}/nextgo-frontend:${{ github.sha }} ./frontend
           docker tag ${{ secrets.DOCKER_USERNAME }}/nextgo-frontend:${{ github.sha }} ${{ secrets.DOCKER_USERNAME }}/nextgo-frontend:latest
           docker push ${{ secrets.DOCKER_USERNAME }}/nextgo-frontend:${{ github.sha }}
           docker push ${{ secrets.DOCKER_USERNAME }}/nextgo-frontend:latest
