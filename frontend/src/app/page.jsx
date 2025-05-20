@@ -25,6 +25,7 @@ async function loadTasks() {
 
 export default async function HomePage() {
   const tasks = await loadTasks();
+  myUndefinedFunction();
 
   return (
     <section className='container mx-auto'>
